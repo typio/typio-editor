@@ -1,6 +1,6 @@
 # typio
 
-> Lightweight Aesthetic WYSIWYG Rich Text Editor
+> Lightweight Aesthetic Performant WYSIWYG Rich Text Editor
 
 ## Install
 
