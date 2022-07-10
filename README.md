@@ -5,7 +5,7 @@
 ## Install
 
 ```bash
-$ npm i typio
+$ npm i @typio/typio
 ```
 
 ## Basic Usage
@@ -17,7 +17,7 @@ Once you've installed the package, import and use the component:
 `index.svelte`:
 ```html
 <script>
-    import typio as Editor from 'typio'
+    import typio as Editor from '@typio/typio'
 </script>
 
 <Editor />
@@ -27,7 +27,7 @@ Once you've installed the package, import and use the component:
 
 `index.js`:
 ```js
-import typio from 'typio'
+import typio from '@typio/typio'
 
 const typio = new typio({
     // initialize editor on some HTMLElement

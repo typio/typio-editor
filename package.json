@@ -1,6 +1,6 @@
 {
-	"name": "typio",
-	"version": "0.0.1",
+	"name": "@typio/typio",
+	"version": "0.0.11",
 	"description": "Lightweight Aesthetic WYSIWYG Rich Text Editor",
 	"author": "Thomas Huber <me@tohuber.com>",
 	"scripts": {
