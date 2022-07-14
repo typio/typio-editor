@@ -6,7 +6,7 @@ This text editor is indended to be similar to Medium's text editor in appearance
 use in a blog type website with limited and opinionated styling options for creating a cohesive
 website look i.e. only one font-family, font color, etc... per document.
 
-The editor features a floating or set toolbar with your choice of text styling buttons.
+The editor features a floating or set toolbar with a customizable formatting buttons.
 
 ## Install
 
