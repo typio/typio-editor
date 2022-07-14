@@ -70,7 +70,9 @@ Or if you want to use the package without npm, you can use the following code:
 ## About
 
 A primary goal of this editor is to internally represent any text in only one way, here is an
-example of what is avoided: |HTML DOM |Render |
+example of what is avoided: 
+
+|HTML DOM |Render |
 |:----------------------------------:|:----------------------------:|
 |`<strong><em>word</em></strong>`|<strong><em>word</em></strong>|
 |`<em><strong>word</strong></em>`|<em><strong>word</strong></em>|
