@@ -1,3 +1,1 @@
-import Editor from './Editor.svelte'
-
-export { Editor }
+export { default as Typio } from './Typio/Typio.svelte'
