@@ -1,12 +1,8 @@
 # typio
 
-> Lightweight Customizable Performant WYSIWYG Rich Text Editor
+> Lightweight, Robust, Customizable, Performant WYSIWYG Editor for the Web
 
-This text editor is indended to be similar to Medium's text editor in appearance and is intended for
-use in a blog type website with limited and opinionated styling options for creating a cohesive
-website look i.e. only one font-family, font color, etc... per document.
-
-The editor features a floating or set toolbar with a customizable formatting buttons.
+This is a customizable Medium-style text editor.
 
 ## Install
 
@@ -69,18 +65,17 @@ Or if you want to use the package without npm, you can use the following code:
 
 ## About
 
-A primary goal of this editor is to internally represent any text in only one way, here is an
-example of what is avoided: 
+The design of this editor is based on principles from [this blog post](https://medium.engineering/why-contenteditable-is-terrible-122d8a40e480). A primary goal of is to internally represent any text in only one way; here is an example of what is avoided:
 
-|HTML DOM |Render |
-|:----------------------------------:|:----------------------------:|
-|`<strong><em>word</em></strong>`|<strong><em>word</em></strong>|
-|`<em><strong>word</strong></em>`|<em><strong>word</strong></em>|
+|             HTML DOM             |             Render             |
+| :------------------------------: | :----------------------------: |
+| `<strong><em>word</em></strong>` | <strong><em>word</em></strong> |
+| `<em><strong>word</strong></em>` | <em><strong>word</strong></em> |
 
-these two would display the same way but have different internal representations. View types.d.ts
-for the current data structure representing the text document.
+these two are displayed by the browser the same yet have different internal representations, which can lead to an inconsistent and undefined user experience. View [types.d.ts](https://github.com/typio/typio/blob/main/src/lib/types.d.ts)
+for the current data structure representing the text document. This data structure is edited by the user directly which is then written to the HTML DOM.
 
-Unlike other lightweight editors, this does not use the deprecated document.execCommand().
+**Unlike other lightweight editors, this does not use the deprecated `document.execCommand()`.**
 
-Currently this project is focused on use as a Svelte component, and may or may not work in vanilla
+Currently this project intended for use as a Svelte component. It may or may not work in vanilla
 JS, though full support is planned.
