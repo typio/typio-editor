@@ -19,7 +19,7 @@ type Paragraph = {
     }
 }
 
-type Section = [Paragraph | Figure]
+type Section = Paragraph | Figure
 
 export type TextDocument = {
     title: string

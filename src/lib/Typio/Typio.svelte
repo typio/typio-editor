@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import bold_icon from '$lib/static/bold_icon.svg'
     import italic_icon from '$lib/static/italic_icon.svg'
     import dropcap_icon from '$lib/static/dropcap_icon.svg'
@@ -9,10 +9,22 @@
     import undo_icon from '$lib/static/undo_icon.svg'
     import redo_icon from '$lib/static/redo_icon.svg'
 
+    import type { Features, TextDocument } from '$lib/types'
+
     let className = 'typio'
     export { className as class }
 
-    const commands = {
+    type Command = {
+        [name: string]: {
+            icon: {
+                type: string
+                src: string
+            }
+            command: string
+        }
+    }
+
+    const commands: Command = {
         bold: {
             icon: {
                 type: 'svg',
@@ -94,7 +106,8 @@
             icon: {
                 type: 'svg',
                 src: dropcap_icon
-            }
+            },
+            command: 'dropCap'
         },
         undo: {
             icon: {
@@ -112,20 +125,17 @@
         }
     }
 
-    const presets = {
+    type Preset = { [name: string]: string }
+    const presets: Preset = {
         default: 'floating-b-i-l-q-h-sh-limpl-dc-undo-redo',
         default_set: 'set-b-i-l-q-h-sh-limpl-dc-undo-redo',
         full: 'set-b-i-u-l-c-s-q-h-sh-ol-ul-dc-undo-redo'
     }
 
-    /** @type {keyof presets}*/
-    let preset = $$restProps.preset
+    const settings: string =
+        $$restProps.settings ?? presets[$$restProps.preset] ?? presets['default']
 
-    /** @type {string} */
-    const settings = $$restProps.settings ?? presets[preset] ?? presets.default
-
-    /** @type {import('$lib/types').Features} */
-    const enabledFeatures = ((settings) => {
+    const enabledFeatures: Features = ((settings) => {
         const mapping = {
             b: 'bold',
             i: 'italic',
@@ -142,8 +152,7 @@
             dc: 'dropCap'
         }
 
-        /** @type {import('$lib/types').Features} */
-        const features = {
+        const features: Features = {
             bold: false,
             italic: false,
             underline: false,
@@ -178,14 +187,26 @@
     const showUndo = settings.toLowerCase().includes('undo')
     const showRedo = settings.toLowerCase().includes('redo')
 
-    /** @type {import('$lib/types').TextDocument} */
-    // let textDoc = {
-    //     title: '',
-    //     subtitle: '',
-    //     sections: []
-    // }
+    let textDoc: TextDocument = {
+        title: 'Tile',
+        subtitle: 'Subtitle',
+        sections: [
+            {
+                content: [{ content: 'text', type: 'default' }],
+                type: 'default',
+                attrs: {
+                    dropCap: true
+                }
+            }
+        ]
+    }
 
-    // const textDocToDom = () => {}
+    const textDocToDom = (textDoc: TextDocument) => {
+        let dom = ''
+        dom += '<h1>' + textDoc.title + '</h1>'
+        dom += '<h2>' + textDoc.subtitle + '</h2>'
+        return dom
+    }
 
     // const format = (sectionIdx, paragraphIdx, startChar, endChar, command) => {}
 
@@ -254,6 +275,7 @@ A WYSIWYG rich text editor component.
         on:mouseup={positionToolbar}
         on:mouseleave={positionToolbar}
         contenteditable="true">
+        {@html textDocToDom(textDoc)}
         This is the default content
     </div>
 </div>
