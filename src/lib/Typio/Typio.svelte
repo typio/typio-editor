@@ -9,7 +9,9 @@
     import undo_icon from '$lib/static/undo_icon.svg'
     import redo_icon from '$lib/static/redo_icon.svg'
 
-    import type { Features, TextDocument } from '$lib/types'
+    import '$lib/Typio/app.css'
+
+    import type { Text, Features, TextDocument } from '$lib/types'
 
     let className = 'typio'
     export { className as class }
@@ -46,12 +48,12 @@
             },
             command: 'underline'
         },
-        strikethrough: {
+        strike: {
             icon: {
                 type: 'html',
                 src: '<s>S</s>'
             },
-            command: 'strikethrough'
+            command: 'strike'
         },
         link: {
             icon: {
@@ -136,11 +138,12 @@
         $$restProps.settings ?? presets[$$restProps.preset] ?? presets['default']
 
     const enabledFeatures: Features = ((settings) => {
-        const mapping = {
+        type Map = { [name: string]: string }
+        const mapping: Map = {
             b: 'bold',
             i: 'italic',
             u: 'underline',
-            s: 'strikethrough',
+            s: 'strike',
             l: 'link',
             c: 'code',
             q: 'blockquote',
@@ -156,7 +159,7 @@
             bold: false,
             italic: false,
             underline: false,
-            strikethrough: false,
+            strike: false,
             link: false,
             code: false,
             blockquote: false,
@@ -169,12 +172,11 @@
         }
 
         for (const key of settings.split('-')) {
-            // @ts-ignore
-            if (mapping[key]) {
-                // @ts-ignore
-                features[mapping[key]] = true
+            if (mapping[key] && mapping[key] in features) {
+                features[mapping[key] as keyof Features] = true
             }
         }
+
         return features
     })(settings)
 
@@ -192,19 +194,70 @@
         subtitle: 'Subtitle',
         sections: [
             {
-                content: [{ content: 'text', type: 'default' }],
+                pContent: [
+                    { textContent: 'This is the ', types: ['strike'] },
+                    { textContent: 'default ', types: ['bold', 'italic'] },
+                    { textContent: 'text', types: ['italic'] },
+                    { textContent: '. Here is ', types: [] },
+                    { textContent: 'google.com', types: ['link'], href: 'https://google.com' },
+                    { textContent: '.', types: [] }
+                ],
                 type: 'default',
                 attrs: {
                     dropCap: true
-                }
+                },
+                contentType: 'paragraph'
+            },
+            {
+                href: 'https://www.fillmurray.com/100/100',
+                caption: [{ textContent: 'Caption', types: ['bold'] }],
+                alt: 'Image alt text',
+                contentType: 'figure'
             }
         ]
     }
 
-    const textDocToDom = (textDoc: TextDocument) => {
+    const parseText = (textArr: Text[]) => {
+        return textArr
+            .map((text) => {
+                let { textContent, href } = text
+                text.types.forEach((type) => {
+                    if (type === 'bold' && enabledFeatures.bold)
+                        textContent = `<strong>${textContent}</strong>`
+                    if (type === 'italic' && enabledFeatures.italic)
+                        textContent = `<em>${textContent}</em>`
+                    if (type === 'underline' && enabledFeatures.underline)
+                        textContent = `<u>${textContent}</u>`
+                    if (type === 'strike' && enabledFeatures.strike)
+                        textContent = `<s>${textContent}</s>`
+                    if (type === 'link' && enabledFeatures.link)
+                        textContent = `<a href="${href}">${textContent}</a>`
+                })
+                return textContent
+            })
+            .join('')
+    }
+
+    const parseDocument = (textDoc: TextDocument) => {
         let dom = ''
         dom += '<h1>' + textDoc.title + '</h1>'
         dom += '<h2>' + textDoc.subtitle + '</h2>'
+        textDoc.sections.forEach((element) => {
+            if (element.contentType == 'paragraph') {
+                dom +=
+                    '<p' +
+                    (element.attrs?.dropCap ? ' class="dropCap"' : '') +
+                    '>' +
+                    parseText(element.pContent) +
+                    '</p>'
+            } else if (element.contentType == 'figure') {
+                dom += '<figure>'
+                dom += '<img src="' + element.href + '" alt="' + element.alt + '">'
+                let caption = element.caption
+                if (caption) dom += '<figcaption>' + parseText(caption) + '</figcaption>'
+                dom += '</figure>'
+            }
+        })
         return dom
     }
 
@@ -275,103 +328,6 @@ A WYSIWYG rich text editor component.
         on:mouseup={positionToolbar}
         on:mouseleave={positionToolbar}
         contenteditable="true">
-        {@html textDocToDom(textDoc)}
-        This is the default content
+        {@html parseDocument(textDoc)}
     </div>
 </div>
-
-<style>
-    @import url('https://rsms.me/inter/inter.css');
-
-    .typio {
-        max-width: 740px;
-        width: 100%;
-        margin: 0 auto;
-    }
-
-    .btn {
-        font-family: 'Inter', sans-serif;
-        background-color: #fff;
-        border: 2px solid #000;
-        /* border-radius: 0.4rem; */
-        user-select: none;
-        width: var(--button-width, 2.4rem);
-        height: var(--button-height, 2.4rem);
-
-        font-size: 1vmax;
-    }
-
-    .btn img {
-        -webkit-user-drag: none;
-        -khtml-user-drag: none;
-        -moz-user-drag: none;
-        -o-user-drag: none;
-
-        max-width: 1vmax;
-        max-height: 1vmax;
-    }
-
-    .typio-editor {
-        font-family: 'Inter', sans-serif;
-        border: 2px solid #aaa;
-        border-radius: 0.4rem;
-        padding: 1rem;
-    }
-
-    .typio-editor:focus {
-        outline: none;
-    }
-
-    .floating {
-        padding: 0.5rem;
-        border-radius: 0.4rem;
-        background-color: var(--toolbar-background-color, #333);
-        position: absolute;
-        transform: translateX(-50%);
-
-        padding: 0.2rem 0.5rem;
-        margin: 0;
-        height: 3em;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-
-    .floating .btn {
-        background-color: transparent;
-        color: #f5f5f5;
-        font-size: 1rem;
-        border: none;
-    }
-
-    .set .btn {
-        /* padding: 1rem; */
-    }
-
-    .typio-toolbar-arrow {
-        position: absolute;
-        margin-left: auto;
-        margin-right: auto;
-        left: 0;
-        right: 0;
-        top: 100%;
-        width: 0;
-        height: 0;
-        border-left: 9px solid transparent;
-        border-right: 9px solid transparent;
-
-        border-top: 10px solid var(--toolbar-background-color);
-    }
-
-    .b {
-        font-weight: 700;
-    }
-
-    .i {
-        font-style: italic;
-    }
-
-    .u {
-        text-decoration: underline;
-    }
-</style>
