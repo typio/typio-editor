@@ -1,9 +1,9 @@
 {
     "tabWidth": 4,
-    "printWidth": 100,
+    "printWidth": 81,
     "semi": false,
     "singleQuote": true,
-    "trailingComma": "none",
+    "trailingComma": "all",
     "proseWrap": "always",
     "svelteSortOrder": "options-scripts-markup-styles",
     "svelteIndentScriptAndStyle": true,

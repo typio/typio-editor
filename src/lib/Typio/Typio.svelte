@@ -1,13 +1,13 @@
 <script lang="ts">
-    import bold_icon from '$lib/static/bold_icon.svg'
-    import italic_icon from '$lib/static/italic_icon.svg'
-    import dropcap_icon from '$lib/static/dropcap_icon.svg'
-    import link_icon from '$lib/static/link_icon.svg'
-    import quote_icon from '$lib/static/quote_icon.svg'
-    import heading_icon from '$lib/static/heading_icon.svg'
-    import subheading_icon from '$lib/static/subheading_icon.svg'
-    import undo_icon from '$lib/static/undo_icon.svg'
-    import redo_icon from '$lib/static/redo_icon.svg'
+    import boldIcon from '$lib/static/boldIcon.svg'
+    import italicIcon from '$lib/static/italicIcon.svg'
+    import dropcapIcon from '$lib/static/dropcapIcon.svg'
+    import linkIcon from '$lib/static/linkIcon.svg'
+    import quoteIcon from '$lib/static/quoteIcon.svg'
+    import headingIcon from '$lib/static/headingIcon.svg'
+    import subheadingIcon from '$lib/static/subheadingIcon.svg'
+    import undoIcon from '$lib/static/undoIcon.svg'
+    import redoIcon from '$lib/static/redoIcon.svg'
 
     import '$lib/Typio/app.css'
 
@@ -30,114 +30,114 @@
         bold: {
             icon: {
                 type: 'svg',
-                src: bold_icon
+                src: boldIcon,
             },
-            command: 'bold'
+            command: 'bold',
         },
         italic: {
             icon: {
                 type: 'svg',
-                src: italic_icon
+                src: italicIcon,
             },
-            command: 'italic'
+            command: 'italic',
         },
         underline: {
             icon: {
                 type: 'html',
-                src: '<u>U</u>'
+                src: '<u>U</u>',
             },
-            command: 'underline'
+            command: 'underline',
         },
         strike: {
             icon: {
                 type: 'html',
-                src: '<s>S</s>'
+                src: '<s>S</s>',
             },
-            command: 'strike'
+            command: 'strike',
         },
         link: {
             icon: {
                 type: 'svg',
-                src: link_icon
+                src: linkIcon,
             },
-            command: 'link'
+            command: 'link',
         },
         code: {
             icon: {
                 type: 'html',
-                src: 'C'
+                src: 'C',
             },
-            command: 'code'
+            command: 'code',
         },
         blockquote: {
             icon: {
                 type: 'svg',
-                src: quote_icon
+                src: quoteIcon,
             },
-            command: 'blockquote'
+            command: 'blockquote',
         },
         heading: {
             icon: {
                 type: 'svg',
-                src: heading_icon
+                src: headingIcon,
             },
-            command: 'heading'
+            command: 'heading',
         },
         subheading: {
             icon: {
                 type: 'svg',
-                src: subheading_icon
+                src: subheadingIcon,
             },
-            command: 'subheading'
+            command: 'subheading',
         },
         oList: {
             icon: {
                 type: 'html',
-                src: '1.'
+                src: '1.',
             },
-            command: 'redo'
+            command: 'redo',
         },
         uList: {
             icon: {
                 type: 'html',
-                src: '&#8226'
+                src: '&#8226',
             },
-            command: 'uList'
+            command: 'uList',
         },
         dropCap: {
             icon: {
                 type: 'svg',
-                src: dropcap_icon
+                src: dropcapIcon,
             },
-            command: 'dropCap'
+            command: 'dropCap',
         },
         undo: {
             icon: {
                 type: 'svg',
-                src: undo_icon
+                src: undoIcon,
             },
-            command: 'undo'
+            command: 'undo',
         },
         redo: {
             icon: {
                 type: 'svg',
-                src: redo_icon
+                src: redoIcon,
             },
-            command: 'redo'
-        }
+            command: 'redo',
+        },
     }
 
     type Preset = { [name: string]: string }
     const presets: Preset = {
         default: 'floating-b-i-l-q-h-sh-limpl-dc-undo-redo',
         default_set: 'set-b-i-l-q-h-sh-limpl-dc-undo-redo',
-        full: 'set-b-i-u-l-c-s-q-h-sh-ol-ul-dc-undo-redo'
+        full: 'set-b-i-u-l-c-s-q-h-sh-ol-ul-dc-undo-redo',
     }
 
     const settings: string =
         $$restProps.settings ?? presets[$$restProps.preset] ?? presets['default']
 
-    const enabledFeatures: Features = ((settings) => {
+    const enabledFeatures: Features = (() => {
         type Map = { [name: string]: string }
         const mapping: Map = {
             b: 'bold',
@@ -152,7 +152,7 @@
             ol: 'oList',
             ul: 'uList',
             limpl: 'listImplicit',
-            dc: 'dropCap'
+            dc: 'dropCap',
         }
 
         const features: Features = {
@@ -168,114 +168,222 @@
             oList: false,
             uList: false,
             listImplicit: false,
-            dropCap: false
+            dropCap: false,
         }
 
-        for (const key of settings.split('-')) {
+        settings.split('-').forEach((key) => {
             if (mapping[key] && mapping[key] in features) {
                 features[mapping[key] as keyof Features] = true
             }
-        }
+        })
 
         return features
-    })(settings)
+    })()
 
-    let toolbar = {
+    const toolbar = {
         type: settings.toLowerCase().includes('floating') ? 'floating' : 'set',
         style: 'display: none;',
         pos: { x: 0, y: 0 },
-        marginY: 63
+        marginY: 63,
     }
     const showUndo = settings.toLowerCase().includes('undo')
     const showRedo = settings.toLowerCase().includes('redo')
 
-    let textDoc: TextDocument = {
+    let textDocument: TextDocument = {
         title: 'Tile',
         subtitle: 'Subtitle',
         sections: [
-            {
-                pContent: [
-                    { textContent: 'This is the ', types: ['strike'] },
-                    { textContent: 'default ', types: ['bold', 'italic'] },
-                    { textContent: 'text', types: ['italic'] },
-                    { textContent: '. Here is ', types: [] },
-                    { textContent: 'google.com', types: ['link'], href: 'https://google.com' },
-                    { textContent: '.', types: [] }
-                ],
-                type: 'default',
-                attrs: {
-                    dropCap: true
+            [
+                {
+                    pTexts: [
+                        { textContent: 'This is the ', types: ['strike'] },
+                        { textContent: 'default ', types: ['bold', 'italic'] },
+                        { textContent: 'text', types: ['italic'] },
+                        { textContent: '. Here is ', types: [] },
+                        {
+                            textContent: 'google.com',
+                            types: ['link'],
+                            href: 'https://google.com',
+                        },
+                        { textContent: '.', types: [] },
+                    ],
+                    type: 'default',
+                    attrs: {
+                        dropCap: true,
+                    },
+                    contentType: 'paragraph',
                 },
-                contentType: 'paragraph'
-            },
-            {
-                href: 'https://www.fillmurray.com/100/100',
-                caption: [{ textContent: 'Caption', types: ['bold'] }],
-                alt: 'Image alt text',
-                contentType: 'figure'
-            }
-        ]
+                {
+                    href: 'https://www.fillmurray.com/100/100',
+                    caption: [
+                        { textContent: 'Ca', types: ['bold'] },
+                        {
+                            textContent: 'pti',
+                            types: ['bold', 'italic', 'link'],
+                            href: 'https://www.fillmurray.com/',
+                        },
+                        { textContent: 'on', types: ['italic'] },
+                    ],
+                    alt: 'Image alt text',
+                    contentType: 'figure',
+                },
+            ],
+        ],
     }
 
-    const parseText = (textArr: Text[]) => {
-        return textArr
+    const parseText = (textArr: Text[]) =>
+        textArr
             .map((text) => {
-                let { textContent, href } = text
+                let { textContent } = text
+                const { href } = text
                 text.types.forEach((type) => {
-                    if (type === 'bold' && enabledFeatures.bold)
+                    if (type === 'bold' && enabledFeatures.bold) {
                         textContent = `<strong>${textContent}</strong>`
-                    if (type === 'italic' && enabledFeatures.italic)
+                    }
+                    if (type === 'italic' && enabledFeatures.italic) {
                         textContent = `<em>${textContent}</em>`
-                    if (type === 'underline' && enabledFeatures.underline)
+                    }
+                    if (type === 'underline' && enabledFeatures.underline) {
                         textContent = `<u>${textContent}</u>`
-                    if (type === 'strike' && enabledFeatures.strike)
+                    }
+                    if (type === 'strike' && enabledFeatures.strike) {
                         textContent = `<s>${textContent}</s>`
-                    if (type === 'link' && enabledFeatures.link)
+                    }
+                    if (type === 'link' && enabledFeatures.link) {
                         textContent = `<a href="${href}">${textContent}</a>`
+                    }
                 })
                 return textContent
             })
             .join('')
-    }
 
+    /**
+     * Generate HTML DOM from internal text document model
+     * @param textDoc
+     */
     const parseDocument = (textDoc: TextDocument) => {
         let dom = ''
-        dom += '<h1>' + textDoc.title + '</h1>'
-        dom += '<h2>' + textDoc.subtitle + '</h2>'
-        textDoc.sections.forEach((element) => {
-            if (element.contentType == 'paragraph') {
-                dom +=
-                    '<p' +
-                    (element.attrs?.dropCap ? ' class="dropCap"' : '') +
-                    '>' +
-                    parseText(element.pContent) +
-                    '</p>'
-            } else if (element.contentType == 'figure') {
-                dom += '<figure>'
-                dom += '<img src="' + element.href + '" alt="' + element.alt + '">'
-                let caption = element.caption
-                if (caption) dom += '<figcaption>' + parseText(caption) + '</figcaption>'
-                dom += '</figure>'
-            }
+        dom += `<h1>${textDoc.title}</h1>`
+        dom += `<h2>${textDoc.subtitle}</h2>`
+        textDoc.sections?.forEach((section, sectionIdx) => {
+            dom += `<section class="${sectionIdx}nth">`
+            section.forEach((paraOrFig, paraOrFigIdx) => {
+                if (paraOrFig.contentType === 'paragraph') {
+                    dom += `<p 
+                    class="${paraOrFigIdx}nth ${
+                        paraOrFig.attrs?.dropCap ? 'dropCap' : ''
+                    }">
+                         ${parseText(paraOrFig.pTexts)}
+                         </p>`
+                } else if (paraOrFig.contentType === 'figure') {
+                    dom += `<figure class="${paraOrFigIdx}nth">`
+                    dom += `<img src="${paraOrFig.href}" alt="${paraOrFig.alt}">`
+                    const { caption } = paraOrFig
+                    if (caption) {
+                        dom += `<figcaption>${parseText(caption)}</figcaption>`
+                    }
+                    dom += '</figure>'
+                }
+            })
+            dom += '</section>'
         })
         return dom
+    }
+
+    const parseDOMText = (parentNode: HTMLElement): Text[] => {
+        const texts: Text[] = []
+        parentNode.childNodes.forEach((child, index) => {
+            let element = child // avoids param reassignment
+            const textContent = element.textContent ?? ''
+            const types: string[] = []
+            let href: Text['href'] = ''
+            while (element.firstChild != null) {
+                if (element.nodeName === 'STRONG') {
+                    types.push('bold')
+                } else if (element.nodeName === 'EM') {
+                    types.push('italic')
+                } else if (element.nodeName === 'U') {
+                    types.push('underline')
+                } else if (element.nodeName === 'S') {
+                    types.push('strike')
+                } else if (element.nodeName === 'A') {
+                    types.push('link')
+                    href = (element as HTMLAnchorElement).href
+                }
+                element = element.firstChild
+            }
+            texts[index] = {
+                textContent,
+                types: types as Text['types'],
+                href,
+            }
+        })
+        return texts
+    }
+
+    /**
+     * Generate internal text document model from an HTML DOM
+     * @param dom
+     */
+    const parseDOM = (dom: HTMLDivElement): TextDocument => {
+        const textDoc: TextDocument = {
+            title: dom.querySelector('h1')?.textContent ?? '',
+            subtitle: dom.querySelector('h2')?.textContent ?? '',
+            sections: [],
+        }
+
+        dom.querySelectorAll('section').forEach((section) => {
+            section.childNodes.forEach((child) => {
+                if (child.nodeName === 'P') {
+                    const p = child as HTMLParagraphElement
+                    const dropCap = p.classList.contains('dropCap')
+                    const pTexts: Text[] = parseDOMText(p)
+                    textDoc.sections.push([
+                        {
+                            pTexts,
+                            type: 'default',
+                            attrs: {
+                                dropCap,
+                            },
+                            contentType: 'paragraph',
+                        },
+                    ])
+                } else if (child.nodeName === 'FIGURE') {
+                    const fig = child as HTMLElement
+                    const href = fig.querySelector('img')?.src ?? ''
+                    const alt = fig.querySelector('img')?.alt
+                    const caption: Text[] = parseDOMText(
+                        fig.querySelector('figcaption') ?? fig,
+                    )
+                    textDoc.sections.push([
+                        {
+                            href,
+                            caption,
+                            alt,
+                            contentType: 'figure',
+                        },
+                    ])
+                }
+            })
+        })
+
+        return textDoc
     }
 
     // const format = (sectionIdx, paragraphIdx, startChar, endChar, command) => {}
 
     const positionToolbar = () => {
-        let selection = window.getSelection()
+        const selection = window.getSelection()
         if (selection && selection?.toString().length > 0) {
-            console.log(selection.toString())
-
-            let range = selection.getRangeAt(0)
-            let rect = range.getBoundingClientRect()
+            const range = selection.getRangeAt(0)
+            const rect = range.getBoundingClientRect()
             toolbar.pos = {
                 x: rect.left + (rect.right - rect.left) / 2,
-                y: rect.top
+                y: rect.top,
             }
-            toolbar.style =
-                'top: ' + (toolbar.pos.y - toolbar.marginY) + 'px; left: ' + toolbar.pos.x + 'px;'
+            toolbar.style = `top: ${toolbar.pos.y - toolbar.marginY}px; left: ${
+                toolbar.pos.x
+            }px;`
         } else {
             toolbar.style = 'display: none'
         }
@@ -286,6 +394,9 @@
         .map((item) => item[0])
     if (showUndo) buttonList.push('undo')
     if (showRedo) buttonList.push('redo')
+
+    let dom: HTMLDivElement
+    let html = parseDocument(textDocument)
 </script>
 
 <!-- @component
@@ -295,20 +406,12 @@ A WYSIWYG rich text editor component.
     <Typio class="my-custom-class" preset="default" | settings="set-b-i-l-h-sh-ol_implicit-undo-redo"/>
     ```
 -->
-<div class={className + ' typio'} {...$$restProps}>
+<div class={`${className} typio`} {...$$restProps}>
     <div
         class="typio-toolbar {toolbar.type}"
-        style={(() => {
-            return toolbar.type === 'floating' ? toolbar.style : ''
-        })()}>
+        style={(() => (toolbar.type === 'floating' ? toolbar.style : ''))()}>
         {#each buttonList as c}
-            <button
-                class="btn"
-                on:click={() => {
-                    // let selection = window.getSelection()
-                    // format(0, 0, 0, 0, commands[c[1]])
-                    positionToolbar()
-                }}>
+            <button class="btn" on:click={() => positionToolbar()}>
                 {#if commands[c]?.icon.type === 'svg'}
                     <img src={commands[c]?.icon?.src} alt="" />
                 {:else}
@@ -327,7 +430,15 @@ A WYSIWYG rich text editor component.
         class="typio-editor"
         on:mouseup={positionToolbar}
         on:mouseleave={positionToolbar}
+        on:keydown={(e) => {
+            if (e.key === 'Escape') {
+                // bring dom and textDocument into sync, by updating textDocument to match dom visually
+                textDocument = parseDOM(dom)
+                html = parseDocument(textDocument)
+            }
+        }}
+        bind:this={dom}
         contenteditable="true">
-        {@html parseDocument(textDoc)}
+        {@html html}
     </div>
 </div>

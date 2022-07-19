@@ -1,19 +1,26 @@
-type Text = {
+export type Text = {
     textContent: string
     types: [] | ('bold' | 'italic' | 'underline' | 'strike' | 'link')[]
     href?: string
 }
 
-type Figure = {
+export type Figure = {
     href: string
     caption?: Text[]
     alt?: string
     contentType: 'figure'
 }
 
-type Paragraph = {
-    pContent: Text[]
-    type: 'default' | 'code' | 'blockquote' | 'heading' | 'subheading' | 'oList' | 'uList'
+export type Paragraph = {
+    pTexts: Text[]
+    type:
+        | 'default'
+        | 'code'
+        | 'blockquote'
+        | 'heading'
+        | 'subheading'
+        | 'oList'
+        | 'uList'
     attrs?: {
         dropCap?: boolean
         listNumber?: number
@@ -21,10 +28,12 @@ type Paragraph = {
     contentType: 'paragraph'
 }
 
+export type Section = (Paragraph | Figure)[]
+
 export type TextDocument = {
-    title: string
-    subtitle: string
-    sections: (Paragraph | Figure)[]
+    title?: string
+    subtitle?: string
+    sections: Section[]
 }
 
 export type Features = {
