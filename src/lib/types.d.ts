@@ -14,13 +14,13 @@ export type Figure = {
 export type Paragraph = {
     pTexts: Text[]
     type:
-        | 'default'
-        | 'code'
-        | 'blockquote'
-        | 'heading'
-        | 'subheading'
-        | 'oList'
-        | 'uList'
+    | 'default'
+    | 'code'
+    | 'blockquote'
+    | 'heading'
+    | 'subheading'
+    | 'oList'
+    | 'uList'
     attrs?: {
         dropCap?: boolean
         listNumber?: number
@@ -50,4 +50,9 @@ export type Features = {
     uList: boolean
     listImplicit: boolean
     dropCap: boolean
+}
+
+export type TextDocumentRange = {
+    start: number
+    length: number
 }

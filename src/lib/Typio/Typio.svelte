@@ -11,7 +11,12 @@
 
     import '$lib/Typio/app.css'
 
-    import type { Text, Features, TextDocument } from '$lib/types'
+    import type {
+        TextDocumentRange,
+        Text,
+        Features,
+        TextDocument,
+    } from '$lib/types'
 
     let className = 'typio'
     export { className as class }
@@ -269,12 +274,9 @@
             dom += `<section class="${sectionIdx}nth">`
             section.forEach((paraOrFig, paraOrFigIdx) => {
                 if (paraOrFig.contentType === 'paragraph') {
-                    dom += `<p 
-                    class="${paraOrFigIdx}nth ${
+                    dom += `<p class="${paraOrFigIdx}nth ${
                         paraOrFig.attrs?.dropCap ? 'dropCap' : ''
-                    }">
-                         ${parseText(paraOrFig.pTexts)}
-                         </p>`
+                    }">${parseText(paraOrFig.pTexts)}</p>`
                 } else if (paraOrFig.contentType === 'figure') {
                     dom += `<figure class="${paraOrFigIdx}nth">`
                     dom += `<img src="${paraOrFig.href}" alt="${paraOrFig.alt}">`
@@ -370,7 +372,150 @@
         return textDoc
     }
 
-    // const format = (sectionIdx, paragraphIdx, startChar, endChar, command) => {}
+    let dom: HTMLDivElement
+    let html = parseDocument(textDocument)
+
+    const typio_id = Math.random().toString(36).substring(2, 12)
+
+    // TODO: resync only single paragraphs and figures at a time for performance
+    const syncDocAndDOM = () => {
+        // bring dom and textDocument into sync, by updating textDocument to match dom visually
+        textDocument = parseDOM(dom)
+        html = parseDocument(textDocument)
+    }
+
+    const getWindowRange = (
+        editorElement: Element,
+    ): TextDocumentRange | null => {
+        let selection = window.getSelection()
+        if (selection != null) {
+            let start = 0,
+                length = 0
+            if (selection.rangeCount > 0) {
+                let windowRange = selection.getRangeAt(0)
+                let preCaretRange = windowRange.cloneRange()
+                preCaretRange.selectNodeContents(editorElement)
+                preCaretRange.setEnd(
+                    windowRange.startContainer,
+                    windowRange.startOffset,
+                )
+                start = preCaretRange.toString().length
+                preCaretRange.setEnd(
+                    windowRange.endContainer,
+                    windowRange.endOffset,
+                )
+                length = preCaretRange.toString().length - start
+            }
+
+            return {
+                start,
+                length,
+            }
+        }
+
+        return null
+    }
+
+    const processChildren = (
+        node: Node,
+        offsetCount: number,
+        targetOffset: number,
+    ): null | { node: Node; offset: number } => {
+        for (let i = 0; i < node.childNodes.length; i++) {
+            console.log('offsetCount', offsetCount);
+            
+            node = node.childNodes[i]
+            if (node.nodeType === Node.TEXT_NODE) {
+                console.log('text node', node)
+                ;[...(node.textContent ?? '')].forEach((char, index) => {
+                    offsetCount++
+                    if (offsetCount === targetOffset) {
+                        return {
+                            node,
+                            offset: index,
+                        }
+                    }
+                })
+            } else if (node.nodeType === Node.ELEMENT_NODE) {
+                console.log('element node', node)
+                processChildren(node, offsetCount, targetOffset)
+            }
+        }
+        
+
+        return { node, offset: offsetCount }
+    }
+
+    const setWindowRange = (
+        editorElement: Element,
+        start: number,
+        length: number,
+    ) => {
+        let selection = window.getSelection()
+        let range = document.createRange()
+
+        let res = processChildren(editorElement, 0, start)
+        if (res != null) {
+            range.setStart(res.node, res.offset)
+        }
+        res = processChildren(editorElement, 0, start + length)
+        if (res != null) {
+            range.setEnd(res.node, res.offset)
+        }
+
+        console.log(res)
+
+        selection?.removeAllRanges()
+        selection?.addRange(range)
+    }
+
+    const handleInput = (e: KeyboardEvent, dom: HTMLDivElement) => {
+        let text_selected = false
+
+        const windowRange = getWindowRange(
+            document.getElementsByClassName(typio_id)[0].children[1],
+        )
+
+        console.log(windowRange)
+
+        if (windowRange !== null) {
+            setWindowRange(
+                document.getElementsByClassName(typio_id)[0].children[1],
+                windowRange.start,
+                windowRange.length,
+            )
+
+            if (windowRange.length > 0) {
+                text_selected = true
+            }
+        }
+
+
+        switch (e.key) {
+            case 'Enter':
+                e.preventDefault()
+                // syncDocAndDOM()
+                break
+            case 'Backspace':
+                e.preventDefault()
+                syncDocAndDOM()
+                break
+            case 'Control':
+                e.preventDefault()
+                // syncDocAndDOM()
+                break
+
+            default:
+                break
+        }
+    }
+
+    const addStyle = (
+        range: TextDocumentRange,
+        textDoc: TextDocument,
+    ): TextDocument => {
+        return textDoc
+    }
 
     const positionToolbar = () => {
         const selection = window.getSelection()
@@ -394,9 +539,6 @@
         .map((item) => item[0])
     if (showUndo) buttonList.push('undo')
     if (showRedo) buttonList.push('redo')
-
-    let dom: HTMLDivElement
-    let html = parseDocument(textDocument)
 </script>
 
 <!-- @component
@@ -406,7 +548,7 @@ A WYSIWYG rich text editor component.
     <Typio class="my-custom-class" preset="default" | settings="set-b-i-l-h-sh-ol_implicit-undo-redo"/>
     ```
 -->
-<div class={`${className} typio`} {...$$restProps}>
+<div class={`${className} typio ${typio_id}`} {...$$restProps}>
     <div
         class="typio-toolbar {toolbar.type}"
         style={(() => (toolbar.type === 'floating' ? toolbar.style : ''))()}>
@@ -430,13 +572,7 @@ A WYSIWYG rich text editor component.
         class="typio-editor"
         on:mouseup={positionToolbar}
         on:mouseleave={positionToolbar}
-        on:keydown={(e) => {
-            if (e.key === 'Escape') {
-                // bring dom and textDocument into sync, by updating textDocument to match dom visually
-                textDocument = parseDOM(dom)
-                html = parseDocument(textDocument)
-            }
-        }}
+        on:keydown={(e) => handleInput(e, dom)}
         bind:this={dom}
         contenteditable="true">
         {@html html}
